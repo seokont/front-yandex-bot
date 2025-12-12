@@ -1,5 +1,5 @@
 (function () {
-  const TRACK_URL = "https://playesop.com:3000";
+  const TRACK_URL = "https://playesop.com";
 
   const userAgent = navigator.userAgent;
   let clientIp = null;
