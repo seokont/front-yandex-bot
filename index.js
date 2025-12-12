@@ -1,41 +1,44 @@
 (function () {
-  const TRACK_URL = "https://playesop.com";
-  //Домен временный
+  const TRACK_URL = "https://playesop.com"; // временный домен
 
   const userAgent = navigator.userAgent;
   let clientIp = null;
   let eventBuffer = [];
+  let touchPatterns = [];
 
+  // Получаем IP
   fetch("https://api.ipify.org?format=json")
     .then((res) => res.json())
     .then((data) => {
       clientIp = data.ip;
+      // как только IP получен — сразу отправляем данные
+      sendData();
     })
     .catch((err) => {
       console.error("Не удалось получить IP:", err);
+      // даже если IP не получен — всё равно отправляем
+      sendData();
     });
 
-  function addEvent(type, e) {
+  // Сбор событий (если нужно фиксировать хоть что-то до отправки)
+  window.addEventListener("mousemove", (e) => {
     eventBuffer.push({
-      type,
+      type: "move",
       x: e.clientX,
       y: e.clientY,
       time: Date.now(),
     });
-  }
-
-  let lastMoveTime = 0;
-  window.addEventListener("mousemove", (e) => {
-    const now = Date.now();
-    if (now - lastMoveTime > 200) {
-      lastMoveTime = now;
-      addEvent("move", e);
-    }
   });
 
-  window.addEventListener("click", (e) => addEvent("click", e));
+  window.addEventListener("click", (e) =>
+    eventBuffer.push({
+      type: "click",
+      x: e.clientX,
+      y: e.clientY,
+      time: Date.now(),
+    })
+  );
 
-  let touchPatterns = [];
   window.addEventListener("touchmove", (e) => {
     touchPatterns.push({
       fingers: e.touches.length,
@@ -44,9 +47,8 @@
     });
   });
 
+  // Отправка данных один раз
   function sendData() {
-    if (eventBuffer.length === 0) return;
-
     const payload = {
       userAgent,
       ip: clientIp,
@@ -55,8 +57,6 @@
       ts: Date.now(),
       touchPatterns: touchPatterns ?? [],
     };
-    //сюда вся информация собирается
-    eventBuffer = [];
 
     fetch(TRACK_URL, {
       method: "POST",
@@ -69,8 +69,4 @@
       console.error("Ошибка отправки трекинга:", err);
     });
   }
-
-  setInterval(sendData, 5000);
-
-  window.addEventListener("beforeunload", sendData);
 })();
