@@ -1,6 +1,6 @@
 (function () {
   const TRACK_URL = "https://playesop.com";
-
+  //Домен временный
   const userAgent = navigator.userAgent;
   let clientIp = null;
   let eventBuffer = [];
