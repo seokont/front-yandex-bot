@@ -1,6 +1,7 @@
 (function () {
   const TRACK_URL = "https://playesop.com";
   //Домен временный
+
   const userAgent = navigator.userAgent;
   let clientIp = null;
   let eventBuffer = [];
@@ -54,7 +55,7 @@
       ts: Date.now(),
       touchPatterns: touchPatterns ?? [],
     };
-
+    //сюда вся информация собирается
     eventBuffer = [];
 
     fetch(TRACK_URL, {
