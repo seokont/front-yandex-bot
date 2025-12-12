@@ -1,0 +1,75 @@
+(function () {
+  const TRACK_URL = "http://84.246.85.217:3000";
+
+  const userAgent = navigator.userAgent;
+  let clientIp = null;
+  let eventBuffer = [];
+
+  fetch("https://api.ipify.org?format=json")
+    .then((res) => res.json())
+    .then((data) => {
+      clientIp = data.ip;
+    })
+    .catch((err) => {
+      console.error("Не удалось получить IP:", err);
+    });
+
+  function addEvent(type, e) {
+    eventBuffer.push({
+      type,
+      x: e.clientX,
+      y: e.clientY,
+      time: Date.now(),
+    });
+  }
+
+  let lastMoveTime = 0;
+  window.addEventListener("mousemove", (e) => {
+    const now = Date.now();
+    if (now - lastMoveTime > 200) {
+      lastMoveTime = now;
+      addEvent("move", e);
+    }
+  });
+
+  window.addEventListener("click", (e) => addEvent("click", e));
+
+  let touchPatterns = [];
+  window.addEventListener("touchmove", (e) => {
+    touchPatterns.push({
+      fingers: e.touches.length,
+      pressure: e.touches[0].force || 0,
+      coordinates: { x: e.touches[0].clientX, y: e.touches[0].clientY },
+    });
+  });
+
+  function sendData() {
+    if (eventBuffer.length === 0) return;
+
+    const payload = {
+      userAgent,
+      ip: clientIp,
+      events: eventBuffer,
+      url: location.href,
+      ts: Date.now(),
+      touchPatterns: touchPatterns ?? [],
+    };
+
+    eventBuffer = [];
+
+    fetch(TRACK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      keepalive: true,
+    }).catch((err) => {
+      console.error("Ошибка отправки трекинга:", err);
+    });
+  }
+
+  setInterval(sendData, 5000);
+
+  window.addEventListener("beforeunload", sendData);
+})();
