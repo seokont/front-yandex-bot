@@ -6,21 +6,7 @@
   let eventBuffer = [];
   let touchPatterns = [];
 
-  // Получаем IP
-  fetch("https://api.ipify.org?format=json")
-    .then((res) => res.json())
-    .then((data) => {
-      clientIp = data.ip;
-      // как только IP получен — сразу отправляем данные
-      sendData();
-    })
-    .catch((err) => {
-      console.error("Не удалось получить IP:", err);
-      // даже если IP не получен — всё равно отправляем
-      sendData();
-    });
-
-  // Сбор событий (если нужно фиксировать хоть что-то до отправки)
+  // Сбор событий
   window.addEventListener("mousemove", (e) => {
     eventBuffer.push({
       type: "move",
@@ -49,6 +35,8 @@
 
   // Отправка данных один раз
   function sendData() {
+    if (eventBuffer.length === 0 && touchPatterns.length === 0) return;
+
     const payload = {
       userAgent,
       ip: clientIp,
@@ -69,4 +57,16 @@
       console.error("Ошибка отправки трекинга:", err);
     });
   }
+
+  // Получаем IP и через 5 секунд отправляем всё, что накопилось
+  fetch("https://api.ipify.org?format=json")
+    .then((res) => res.json())
+    .then((data) => {
+      clientIp = data.ip;
+      setTimeout(sendData, 5000); // отправка один раз
+    })
+    .catch((err) => {
+      console.error("Не удалось получить IP:", err);
+      setTimeout(sendData, 5000); // даже если IP не получен
+    });
 })();
