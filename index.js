@@ -34,7 +34,7 @@
 
   // Отправка данных один раз
   function sendData() {
-    if (eventBuffer.length === 0 && touchPatterns.length === 0) return;
+    // if (eventBuffer.length === 0 && touchPatterns.length === 0) return;
 
     const payload = {
       userAgent,
