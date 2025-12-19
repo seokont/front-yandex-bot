@@ -31,8 +31,11 @@
       coordinates: { x: e.touches[0].clientX, y: e.touches[0].clientY },
     });
   });
-
+  let sent = false;
   function sendData() {
+    if (sent) return;
+    sent = true;
+
     // if (eventBuffer.length === 0 && touchPatterns.length === 0) return;
     const payload = {
       userAgent,
@@ -60,10 +63,12 @@
     .then((res) => res.json())
     .then((data) => {
       clientIp = data.ip || "";
-      setTimeout(sendData, 5000);
+      // setTimeout(sendData, 5000);
     })
     .catch((err) => {
+      clientIp = "";
       // console.error("Не удалось получить IP:", err);
       // setTimeout(sendData, 5000);
-    });
+    })
+    .finally(() => setTimeout(sendData, 5000));
 })();
