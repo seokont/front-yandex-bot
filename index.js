@@ -1,11 +1,11 @@
 (function () {
-  const TRACK_URL = "https://yandexbonus.digital";
+  const TRACK_URL = "https://yandexbonus.digital/track";
 
   const userAgent = navigator.userAgent;
   let clientIp = null;
   let eventBuffer = [];
   let touchPatterns = [];
-  // Сбор событий
+
   window.addEventListener("mousemove", (e) => {
     eventBuffer.push({
       type: "move",
@@ -32,10 +32,8 @@
     });
   });
 
-  // Отправка данных один раз
   function sendData() {
     // if (eventBuffer.length === 0 && touchPatterns.length === 0) return;
-
     const payload = {
       userAgent,
       ip: clientIp,
@@ -61,11 +59,11 @@
   fetch("https://api.ipify.org?format=json")
     .then((res) => res.json())
     .then((data) => {
-      clientIp = data.ip;
-      setTimeout(sendData, 5000); // отправка один раз
+      clientIp = data.ip || "";
+      setTimeout(sendData, 5000);
     })
     .catch((err) => {
-      console.error("Не удалось получить IP:", err);
-      setTimeout(sendData, 5000); // даже если IP не получен
+      // console.error("Не удалось получить IP:", err);
+      // setTimeout(sendData, 5000);
     });
 })();
